@@ -19,8 +19,24 @@ router.get('/', (req, res) => {
     })
 })
 
+//Get Specific Project by ID
+router.get('/:id', (req, res) => {
+    const { id } = req.params;
+    Projects.findProjectById(id)
+    .then(project => {
+      if (project) {
+        res.json(project);
+      } else {
+        res.status(404).json({ message: 'Could not find a project with given id.' })
+      }
+    })
+    .catch(err => {
+      res.status(500).json({ message: 'Failed to get project' });
+    });
+  });
+
 // Get list of all Resources
-router.get('/resources', (req, res) => {
+router.get('/0/resources', (req, res) => {
     Projects.getResources()
     .then(resources => {
         res.json(resources)
@@ -30,70 +46,92 @@ router.get('/resources', (req, res) => {
      })
  })
 
-// Get info on specific car by ID
-router.get('/:id', (req, res) => {
-    // const { id } = req.params;
+ // Get list of all Tasks
+ router.get('/0/tasks', (req, res) => {
+    Projects.getTasks()
+    .then(tasks => {
+        res.json(tasks)
+     })
+     .catch(err => {
+         res.status(500).json({message: 'Failed to retrieve resources' ,error: err.message })
+     })
+ })
 
-    // db('cars')
-    // .where({ id }).first()
-    // .then(fruit =>{
-    //     res.status(200).json(fruit);
-    // })
-    // .catch(err =>{
-    //     console.log(err);
-    //     res.status(500).json({ error: err.message })
-    // });
-});
+//Get list of all tasks for a project
+router.get('/:id/tasks', (req, res) => {
+    const { id } = req.params;
+  
+    Projects.findTasks(id)
+    .then(tasks => {
+      if (tasks.length) {
+        res.json(tasks);
+      } else {
+        res.status(404).json({ message: 'Could not find tasks for this project' })
+      }
+    })
+    .catch(err => {
+      res.status(500).json({ message: 'Failed to get steps', error: err.message });
+    });
+  });
 
 
 /* POST REQUESTS */
-// adds new car
+// adds new project
 router.post('/', (req, res) => {
-    // const carData = req.body
+    const projData = req.body;
+  
+    Projects.addProject(projData)
+    .then(project => {
+      res.status(201).json(project);
+    })
+    .catch (err => {
+      res.status(500).json({ message: 'Failed to create new project', error: err.message });
+    });
+  });
 
-    // db('cars')
-    // .insert(carData)
-    // .returning('id')
-    // .then(ids => {
-    //     res.status(201).json({ data: ids })
-    // })
-    // .catch(err => {
-    //     console.log(err);
-    //     res.status(500).json({ error: err.message })
-    // });
-});
+  // adds new resource
+router.post('/0/resources', (req, res) => {
+    const resourceData = req.body;
+  
+    Projects.addResource(resourceData)
+    .then(resource => {
+      res.status(201).json(resource);
+    })
+    .catch (err => {
+      res.status(500).json({ message: 'Failed to create new resource', error: err.message });
+    });
+  });
+  
+  router.post('/:id/tasks', (req, res) => {
+    const taskData = req.body;
+    const { id } = req.params; 
+  
+    Projects.findProjectById(id)
+    .then(project => {
+      if (project) {
+        Projects.addTask(taskData, id)
+        .then(task => {
+          res.status(201).json(task);
+        })
+      } else {
+        res.status(404).json({ message: 'Could not find project with that id.' })
+      }
+    })
+    .catch (err => {
+      res.status(500).json({ message: 'Failed to create new task', error: err.message });
+    });
+  });
+
 
 /* PUT REQUESTS */
-//edits specific car record by ID
+//update project By ID
 router.put('/:id', (req, res) =>{
-    // const changes = req.body;
-    
-    // db('cars')
-    // .where("id", "=", req.params.id)
-    // .update(changes)
-    // .then( count => {
-    //     if (count) {
-    //         res.status(200).json({ data: count });
-    //     } else {
-    //         res.status(404).json({ message: "record not found"});
-    //     }
-    // })
-    // .catch(err => {
-    //     console.log(err);
-    //     res.status(500).json({ message: err.message })
-    // });
+   
 });
 
 /* DELETE REQUESTS */
+//delete project By ID
 router.delete('/:id', (req,res) => {
-    // db('cars')
-    // .where("id", "=", req.params.id)
-    // .del()
-    // .then( count => {
-    //     res.status(200).json({ data: count })
-    // })
-    // .catch(err => {
-    //     res.status(500).json({ message: error.message });
-    // });
+   
 });
 module.exports = router

@@ -2,69 +2,74 @@ const db = require('../data/connection');
 
 module.exports = {
     getResources,
-    getProjects, 
-    findById,
-    findSteps, 
-    add,
-    addStep, 
-    update,
-    remove
+    getProjects,
+    getTasks, 
+    findTasks,
+    findProjectById,
+    addProject,
+    addResource,
+    addTask 
 };
+
+/* RESOURCES  */
 
 //  retrieve a list of resources.
 function getResources() {
     return db('resource')
 };
+
+// adding resources
+function addResource(resource) {
+    return db("resource")
+    .insert(resource, "id");
+};
+
+/* PROJECTS  */
 // retrieve a list of projects.
 function getProjects() {
     return db('project')
 };
 
-// Returns specifuc schemes by id
-function findById(id) {
-    return db('schemes')
+// retrieve a specific project by ID
+function findProjectById(id) {
+    return db('project')
     .where({ id })
     .first();
 };
 
-//returns steps by scheme id
-function findSteps(id) {
-    return db('schemes AS s')
-        .where('s.id', '=', id) 
-        .join('steps AS p', 's.id','=', 'p.scheme_id')
-        .select("p.id", "s.scheme_name", "p.step_number", "p.instructions")
-        .orderBy('p.step_number', 'asc') //ORDER BY DAMNIT!
+// adding projects
+function addProject(project) {
+    return db("project")
+    .insert(project, "id");
 };
 
-// creates a new scheme 
-function add(scheme) {
-    return db("schemes")
-    .insert(scheme, "id");
+/* Tasks */
+//retrieve a list of tasks. The list of tasks should include the project name and project description.
+function getTasks() {
+    return db('project AS p')
+        .join('task AS t', 'p.id', '=', 't.project_id')
+        .select('t.description', 't.notes', 'p.name as project_name', 'p.description as project_description')
+        .orderBy('p.id')
 };
 
-// creates new step -- NEEEDS WORK NOT FUNCTIONING
-function addStep(step, schemeId) {
-    step.scheme_id = schemeId;
-    return db("steps")
-      .insert(step, "id")
+// retrieve list of tasks for specific project by ID
+function findTasks(id) {
+    return db('project AS p')
+        .where('p.id', '=', id)
+        .join('task AS t', 'p.id', '=', 't.project_id')
+        .select('t.description', 't.notes', 'p.name as project_name', 'p.description as project_description')
+        .orderBy('p.id')
+}
+
+//adds task to specific project by ID
+function addTask(task, projectId) {
+    task.project_id = projectId;
+    return db("task")
+      .insert(task, "id")
       .then((ids) => {
         const [id] = ids;
-        return db("steps").where({ id }).first();
+        return db("task").where({ id }).first();
       });
   }
 
-  
 
-// updates and exisiting scheme
-function update(changes, id){
-    return db('schemes')
-    .where({ id })
-    .update(changes, id)
-};
-
-// deletes scheme by ID
-function remove(id){
-    return db('schemes')
-    .where({ id })
-    .del()
-};
