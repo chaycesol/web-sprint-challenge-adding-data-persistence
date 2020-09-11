@@ -6,7 +6,7 @@ const helmet = require('helmet');
 // **We will comment these back in when we get to a later step
 // const db = require('whatever/db-config.js');
 
-// const whateverRouter = require('./routers/whatever-router.js');
+const projectRouter = require('../routers/project/project-router.js');
 
 const server = express();
 
@@ -15,7 +15,7 @@ server.use(helmet());
 
 // Node Middleware
 server.use(express.json());
-// server.use('/api/recipes', recipesRouter);
+server.use('/api/projects', projectRouter);
 
 //Custom Middleware
 server.use(logger());
