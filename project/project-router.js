@@ -1,25 +1,34 @@
 const express = require('express');
 
 // connection to database database
-// const db = require('../data/connection')
+const Projects = require('./project-model.js');
 // use Router
 const router = express.Router();
 
 
 /* GET REQUESTS */
 
-// Get list of all Car Inventory
+// Get list of all Projects
 router.get('/', (req, res) => {
-    res.status(200).json({message: 'endpoint route is working'})
-//     db('cars')
-//     .then(cars => {
-//         res.status(200).json({ data: cars });
-//     })
-//     .catch(err => {
-//         console.log(err)
-//         res.status(500).json({ message: err.message })
-//     })
+   Projects.getProjects()
+   .then(projects => {
+       res.json(projects)
+    })
+    .catch(err => {
+        res.status(500).json({message: 'Failed to retrieve projects' ,error: err.message })
+    })
 })
+
+// Get list of all Resources
+router.get('/resources', (req, res) => {
+    Projects.getResources()
+    .then(resources => {
+        res.json(resources)
+     })
+     .catch(err => {
+         res.status(500).json({message: 'Failed to retrieve resources' ,error: err.message })
+     })
+ })
 
 // Get info on specific car by ID
 router.get('/:id', (req, res) => {
